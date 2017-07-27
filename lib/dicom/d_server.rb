@@ -194,8 +194,13 @@ module DICOM
             # Receive an incoming message:
             segments = link.receive_multiple_transmissions
             info = segments.first
+            if @file_handler.respond_to?(:on_new_connection)
+              accept_connection = @file_handler.on_new_connection(info)
+            else
+              accept_connection = true
+            end
             # Interpret the received message:
-            if info[:valid]
+            if info[:valid] && accept_connection
               association_error = check_association_request(info)
               unless association_error
                 info, approved, rejected = process_syntax_requests(info)
